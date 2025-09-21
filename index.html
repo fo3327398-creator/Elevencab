@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Voice Generator - ElevenLabs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      width: 95%;
+      max-width: 500px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 12px;
+      font-size: 16px;
+      resize: none;
+    }
+    select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+    }
+    select {
+      background: #eee;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    audio {
+      margin-top: 20px;
+      width: 100%;
+    }
+    .download-btn {
+      background: #2196F3;
+      margin-top: 10px;
+    }
+    .download-btn:hover {
+      background: #1976D2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>AI Voice Generator</h2>
+    <textarea id="textInput" placeholder="Type your text here..."></textarea>
+    
+    <select id="voiceSelect">
+      <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female - Natural)</option>
+      <option value="VR6AewLTigWG4xSOukaG">Josh (Male - Deep)</option>
+      <option value="AZnzlk1XvdvUeBnXmlld">Bella (Female - Soft)</option>
+      <option value="EXAVITQu4vr4xnSDxMaL">Domi (Female)</option>
+      <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
+      <option value="pNInz6obpgDQGcFmaJgB">Arnold (Male - Dramatic)</option>
+    </select>
+    
+    <button onclick="generateVoice()">🎤 Generate Voice</button>
+    <audio id="audioPlayer" controls></audio>
+    <button class="download-btn" id="downloadBtn" style="display:none;">💾 Download MP3</button>
+  </div>
+
+  <script>
+    async function generateVoice() {
+      const text = document.getElementById("textInput").value;
+      const voiceId = document.getElementById("voiceSelect").value;
+      const audioPlayer = document.getElementById("audioPlayer");
+      const downloadBtn = document.getElementById("downloadBtn");
+
+      if (!text) {
+        alert("Please enter some text");
+        return;
+      }
+
+      const apiKey = "sk_f6ec34c4209f4ce47a1170900473de794a452c14ed054afa"; // 🔑 Replace with your ElevenLabs API key
+
+      try {
+        const response = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+          {
+            method: "POST",
+            headers: {
+              "Accept": "audio/mpeg",
+              "Content-Type": "application/json",
+              "xi-api-key": apiKey
+            },
+            body: JSON.stringify({
+              text: text,
+              model_id: "eleven_multilingual_v2", // ✅ more natural model
+              voice_settings: {
+                stability: 0.3,
+                similarity_boost: 0.8
+              }
+            })
+          }
+        );
+
+        if (!response.ok) {
+          alert("Error: " + response.statusText);
+          return;
+        }
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        audioPlayer.src = audioUrl;
+        audioPlayer.play();
+
+        // Enable download button
+        downloadBtn.style.display = "block";
+        downloadBtn.onclick = () => {
+          const a = document.createElement("a");
+          a.href = audioUrl;
+          a.download = "voice.mp3";
+          a.click();
+        };
+
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
